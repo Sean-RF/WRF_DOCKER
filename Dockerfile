@@ -6,6 +6,7 @@ MAINTAINER Dave Gill <gill@ucar.edu>
 ENV WRF_VERSION 4.0.3
 ENV WPS_VERSION 4.0.2
 ENV NML_VERSION 4.0.2
+ENV HDF5_VERSION hdf5-1.8.19
 
 # Set up base OS environment
 
@@ -45,15 +46,17 @@ RUN source /opt/rh/devtoolset-8/enable \
  && rm -rf /wrf/libs/openmpi/BUILD_DIR
 
 # Build HDF5 libraries
+
+ARG HDF5_VERSION
 RUN mkdir -p /wrf/libs/hdf5/BUILD_DIR
-RUN source /opt/rh/devtoolset-8/enable \
- && cd /wrf/libs/hdf5/BUILD_DIR \
- && git clone https://bitbucket.hdfgroup.org/scm/hdffv/hdf5.git \
- && cd hdf5 \
- && git checkout hdf5-1_10_4 \
- && ./configure --enable-fortran --enable-cxx --prefix=/usr/local/ &> /wrf/libs/build_log_hdf5_config \
- && make install &> /wrf/libs/build_log_hdf5_make \
- && rm -rf /wrf/libs/hdf5/BUILD_DIR
+
+ADD tars/${HDF5_VERSION}.tar.gz /wrf/libs/hdf5/BUILD_DIR
+WORKDIR /wrf/libs/hdf5/BUILD_DIR/${HDF5_VERSION}
+RUN ./configure --enable-fortran --enable-cxx --with-zlib=/usr/local --prefix=/usr/local &> /wrf/libs/build_log_hdf5_config
+RUN make
+RUN make install
+
+
 ENV LD_LIBRARY_PATH /usr/local/lib
 
 # Build netCDF C and Fortran libraries
