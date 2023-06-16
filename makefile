@@ -9,3 +9,9 @@ build:
 	docker build -t wrf_tutorial --build-arg argname=tutorial ${BUILD_ARGS} .
 
 all: downloads build
+
+run:
+	docker run -it wrf_tutorial /bin/tcsh
+
+run-no-save:
+	docker run -it --rm wrf_tutorial /bin/tcsh
